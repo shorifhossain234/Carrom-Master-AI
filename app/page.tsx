@@ -1,23 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
-  const [active, setActive] = useState("Analysis");
-
-  const menuItems = [
-    { name: "Analysis", icon: "◈" },
-    { name: "Practice", icon: "◉" },
-    { name: "Settings", icon: "⚙" },
-  ];
-
   return (
     <main className="min-h-screen bg-[#050812] text-white">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-6 md:px-8">
 
         <header className="flex items-center justify-between border-b border-white/10 pb-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 text-xl font-bold shadow-lg shadow-cyan-500/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 text-xl font-bold shadow-lg shadow-cyan-500/20">
               C
             </div>
 
@@ -37,131 +29,139 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="grid flex-1 gap-6 py-8 lg:grid-cols-[240px_1fr]">
+        <section className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[1.15fr_0.85fr]">
 
-          <aside className="rounded-3xl border border-white/10 bg-white/[0.035] p-3 backdrop-blur-xl">
-            <p className="px-3 pb-3 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Control Center
+          <div>
+            <div className="mb-5 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/5 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+              Smart Trajectory System
+            </div>
+
+            <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
+              Analyze every shot
+              <span className="block bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                with precision.
+              </span>
+            </h2>
+
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-400 md:text-base">
+              Configure your Carrom board, identify the striker and target,
+              and visualize possible direct and bounce trajectories through
+              a professional analysis interface.
             </p>
 
-            <div className="space-y-2">
-              {menuItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => setActive(item.name)}
-                  className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-                    active === item.name
-                      ? "bg-blue-500/15 text-cyan-300 ring-1 ring-cyan-400/20"
-                      : "text-slate-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <span className="text-base">{item.icon}</span>
-                  {item.name}
-                </button>
-              ))}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/analysis"
+                className="rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3.5 text-sm font-semibold shadow-xl shadow-blue-500/20 transition hover:scale-[1.02]"
+              >
+                Start Analysis
+              </Link>
+
+              <Link
+                href="/analysis"
+                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+              >
+                Practice Mode
+              </Link>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-cyan-400/10 bg-gradient-to-br from-blue-500/10 to-cyan-400/5 p-4">
-              <p className="text-xs font-semibold text-white">
-                Analysis Engine
-              </p>
+            <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+              <Feature
+                title="Board Setup"
+                text="Configure board and pocket positions."
+                icon="◈"
+              />
 
-              <p className="mt-1 text-[11px] leading-5 text-slate-400">
-                Board analysis and trajectory visualization system.
-              </p>
+              <Feature
+                title="Trajectory"
+                text="Visualize direct and reflected paths."
+                icon="⌁"
+              />
 
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-emerald-400">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Ready
-              </div>
+              <Feature
+                title="Precision"
+                text="Fine-tune analysis controls."
+                icon="✓"
+              />
             </div>
-          </aside>
+          </div>
 
-          <div className="flex flex-col gap-6">
+          <div className="relative mx-auto w-full max-w-[520px]">
+            <div className="absolute -inset-10 rounded-full bg-blue-500/10 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-blue-500/10 via-white/[0.025] to-cyan-400/5 p-6 md:p-8">
-              <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl" />
-              <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-cyan-400/5 blur-3xl" />
+            <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.035] p-5 shadow-2xl backdrop-blur-xl">
 
-              <div className="relative">
-                <div className="mb-4 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">
-                  Smart Trajectory System
-                </div>
-
-                <h2 className="max-w-2xl text-3xl font-bold leading-tight md:text-5xl">
-                  Analyze every shot
-                  <span className="block bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                    with precision.
-                  </span>
-                </h2>
-
-                <p className="mt-4 max-w-xl text-sm leading-6 text-slate-400 md:text-base">
-                  Set up your board, define the striker and target positions,
-                  then visualize possible shot paths and bounce trajectories.
-                </p>
-
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <button
-                    onClick={() => setActive("Analysis")}
-                    className="rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-5 py-3 text-sm font-semibold shadow-xl shadow-blue-500/20 transition hover:scale-[1.02]"
-                  >
-                    Start Analysis
-                  </button>
-
-                  <button
-                    onClick={() => setActive("Practice")}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-                  >
-                    Practice Mode
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-                <div className="mb-4 text-cyan-300">◈</div>
-                <p className="text-sm font-semibold">Board Setup</p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Configure board and pocket positions.
-                </p>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-                <div className="mb-4 text-blue-400">⌁</div>
-                <p className="text-sm font-semibold">Trajectory</p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Visualize direct and reflected paths.
-                </p>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-                <div className="mb-4 text-emerald-400">✓</div>
-                <p className="text-sm font-semibold">Precision</p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Fine-tune your analysis controls.
-                </p>
-              </div>
-
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold">Current Mode</p>
+                  <p className="text-sm font-semibold">Board Preview</p>
                   <p className="mt-1 text-xs text-slate-500">
-                    {active} workspace selected
+                    Analysis ready
                   </p>
                 </div>
 
-                <div className="rounded-full border border-blue-400/20 bg-blue-400/10 px-4 py-2 text-xs text-blue-300">
-                  {active}
+                <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] text-emerald-400">
+                  READY
                 </div>
               </div>
-            </div>
 
+              <div className="relative aspect-square rounded-[1.5rem] border-[8px] border-[#70421f] bg-[#d5a263] p-[7%] shadow-2xl">
+
+                <div className="relative h-full w-full border-[3px] border-[#4b2b18] bg-[#c99254]">
+
+                  <Pocket className="left-[-7%] top-[-7%]" />
+                  <Pocket className="right-[-7%] top-[-7%]" />
+                  <Pocket className="bottom-[-7%] left-[-7%]" />
+                  <Pocket className="bottom-[-7%] right-[-7%]" />
+
+                  <div
+                    className="absolute left-[24%] top-[58%] h-7 w-7 rounded-full border-2 border-white bg-white shadow-lg"
+                    title="Striker"
+                  />
+
+                  <div
+                    className="absolute left-[58%] top-[37%] h-7 w-7 rounded-full border-2 border-black/30 bg-black shadow-lg"
+                    title="Target"
+                  />
+
+                  <div
+                    className="absolute left-[48%] top-[49%] h-7 w-7 rounded-full border-2 border-red-500/50 bg-red-500 shadow-lg"
+                    title="Coin"
+                  />
+
+                  <div
+                    className="absolute left-[27%] top-[59%] h-[2px] w-[38%] origin-left bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+                    style={{ transform: "rotate(-31deg)" }}
+                  />
+
+                  <div
+                    className="absolute left-[58%] top-[37%] h-[2px] w-[30%] origin-left bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+                    style={{ transform: "rotate(-43deg)" }}
+                  />
+
+                  <div className="absolute bottom-[8%] left-[12%] rounded-full border border-white/20 bg-black/50 px-3 py-1 text-[9px] text-white/80">
+                    STRIKER
+                  </div>
+
+                  <div className="absolute right-[10%] top-[24%] rounded-full border border-white/20 bg-black/50 px-3 py-1 text-[9px] text-white/80">
+                    TARGET
+                  </div>
+
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between rounded-2xl border border-cyan-400/10 bg-cyan-400/5 px-4 py-3">
+                <span className="text-xs text-slate-400">
+                  Trajectory Engine
+                </span>
+
+                <span className="text-xs font-semibold text-cyan-300">
+                  Online
+                </span>
+              </div>
+
+            </div>
           </div>
+
         </section>
 
         <footer className="border-t border-white/10 pt-5 text-center text-[10px] text-slate-600">
@@ -170,5 +170,35 @@ export default function Home() {
 
       </div>
     </main>
+  );
+}
+
+function Feature({
+  title,
+  text,
+  icon,
+}: {
+  title: string;
+  text: string;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+      <div className="mb-3 text-cyan-300">{icon}</div>
+
+      <p className="text-sm font-semibold">{title}</p>
+
+      <p className="mt-2 text-[11px] leading-5 text-slate-500">
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function Pocket({ className }: { className: string }) {
+  return (
+    <div
+      className={`absolute h-11 w-11 rounded-full bg-[#17110d] shadow-[inset_0_0_12px_rgba(0,0,0,0.8)] ${className}`}
+    />
   );
 }
