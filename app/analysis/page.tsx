@@ -20,28 +20,41 @@ export default function AnalysisPage() {
     y: 35,
   });
 
-  const [dragging, setDragging] = useState<"striker" | "target" | null>(
-    null
-  );
+  const [dragging, setDragging] = useState<
+    "striker" | "target" | null
+  >(null);
 
-  const [lineColor, setLineColor] = useState("#22d3ee");
   const [showBounce, setShowBounce] = useState(true);
   const [showTarget, setShowTarget] = useState(true);
+  const [trajectoryColor, setTrajectoryColor] =
+    useState("#22d3ee");
 
-  const updatePosition = (event: PointerEvent<HTMLDivElement>) => {
+  const movePiece = (
+    event: PointerEvent<HTMLDivElement>
+  ) => {
     if (!dragging || !boardRef.current) return;
 
-    const rect = boardRef.current.getBoundingClientRect();
+    const rect =
+      boardRef.current.getBoundingClientRect();
 
-    let x = ((event.clientX - rect.left) / rect.width) * 100;
-    let y = ((event.clientY - rect.top) / rect.height) * 100;
+    let x =
+      ((event.clientX - rect.left) /
+        rect.width) *
+      100;
 
-    x = Math.max(5, Math.min(95, x));
-    y = Math.max(5, Math.min(95, y));
+    let y =
+      ((event.clientY - rect.top) /
+        rect.height) *
+      100;
+
+    x = Math.max(7, Math.min(93, x));
+    y = Math.max(7, Math.min(93, y));
 
     if (dragging === "striker") {
       setStriker({ x, y });
-    } else {
+    }
+
+    if (dragging === "target") {
       setTarget({ x, y });
     }
   };
@@ -49,27 +62,39 @@ export default function AnalysisPage() {
   const dx = target.x - striker.x;
   const dy = target.y - striker.y;
 
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
   const angle = Math.round(
     Math.atan2(dy, dx) * (180 / Math.PI)
   );
 
+  const distance = Math.sqrt(
+    dx * dx + dy * dy
+  );
+
   const resetBoard = () => {
-    setStriker({ x: 25, y: 70 });
-    setTarget({ x: 62, y: 35 });
-    setLineColor("#22d3ee");
+    setStriker({
+      x: 25,
+      y: 70,
+    });
+
+    setTarget({
+      x: 62,
+      y: 35,
+    });
+
     setShowBounce(true);
     setShowTarget(true);
+    setTrajectoryColor("#22d3ee");
   };
 
   return (
-    <main className="min-h-screen bg-[#050812] px-4 py-5 text-white md:px-8">
+    <main className="min-h-screen bg-[#050812] px-4 py-6 text-white md:px-8">
+
       <div className="mx-auto max-w-7xl">
 
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+            <p className="text-xs uppercase tracking-[0.25em] text-cyan-400">
               Carrom Master AI
             </p>
 
@@ -88,88 +113,125 @@ export default function AnalysisPage() {
           >
             Back to Home
           </a>
+
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <section className="grid gap-6 lg:grid-cols-[1fr_330px]">
+
+          {/* BOARD */}
 
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 md:p-6">
 
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+
               <div>
-                <p className="text-sm font-semibold">
+                <h2 className="text-lg font-semibold">
                   Interactive Analysis Board
-                </p>
+                </h2>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Drag the striker and target directly on the board.
+                  Drag STRIKER or TARGET anywhere on the board.
                 </p>
               </div>
 
-              <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400">
                 ENGINE READY
-              </div>
+              </span>
+
             </div>
 
             <div
               ref={boardRef}
-              onPointerMove={updatePosition}
-              onPointerUp={() => setDragging(null)}
-              onPointerCancel={() => setDragging(null)}
-              className="relative mx-auto aspect-square w-full max-w-[700px] touch-none rounded-[2rem] border-[10px] border-[#74451f] bg-[#d5a263] p-[7%] shadow-2xl"
+              onPointerMove={movePiece}
+              onPointerUp={() =>
+                setDragging(null)
+              }
+              onPointerLeave={() =>
+                setDragging(null)
+              }
+              onPointerCancel={() =>
+                setDragging(null)
+              }
+              className="relative mx-auto aspect-square w-full max-w-[700px] touch-none rounded-[2rem] border-[12px] border-[#70451f] bg-[#d6a35f] p-[6%] shadow-2xl"
             >
 
-              <div className="relative h-full w-full overflow-hidden border-[3px] border-[#4b2b18] bg-[#c99254]">
+              <div className="relative h-full w-full overflow-hidden rounded-xl border-[4px] border-[#432514] bg-[#c99352]">
 
-                <div className="absolute left-1/2 top-0 h-full w-px bg-[#4b2b18]/10" />
+                {/* Board decorations */}
 
-                <div className="absolute left-0 top-1/2 h-px w-full bg-[#4b2b18]/10" />
+                <div className="pointer-events-none absolute inset-[8%] rounded-full border-2 border-[#70451f]/30" />
 
-                <Pocket className="left-[-7%] top-[-7%]" />
-                <Pocket className="right-[-7%] top-[-7%]" />
-                <Pocket className="bottom-[-7%] left-[-7%]" />
-                <Pocket className="bottom-[-7%] right-[-7%]" />
+                <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#70451f]/10" />
 
-                {showTarget && (
-                  <div
-                    className="pointer-events-none absolute h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed"
-                    style={{
-                      left: `${target.x}%`,
-                      top: `${target.y}%`,
-                      borderColor: lineColor,
-                    }}
-                  />
-                )}
+                <div className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 bg-[#70451f]/10" />
+
+                <Pocket className="left-[-6%] top-[-6%]" />
+                <Pocket className="right-[-6%] top-[-6%]" />
+                <Pocket className="bottom-[-6%] left-[-6%]" />
+                <Pocket className="bottom-[-6%] right-[-6%]" />
+
+                {/* Trajectory */}
 
                 <Trajectory
                   striker={striker}
                   target={target}
-                  color={lineColor}
+                  color={trajectoryColor}
                 />
 
-                {showBounce && (
-                  <BouncePath
-                    target={target}
-                    color={lineColor}
+                {/* Target highlight */}
+
+                {showTarget && (
+                  <div
+                    className="pointer-events-none absolute z-10 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed"
+                    style={{
+                      left: `${target.x}%`,
+                      top: `${target.y}%`,
+                      borderColor:
+                        trajectoryColor,
+                      boxShadow:
+                        `0 0 20px ${trajectoryColor}`,
+                    }}
                   />
                 )}
 
-                <DraggablePiece
-                  label="STRIKER"
+                {/* Bounce guide */}
+
+                {showBounce && (
+                  <BounceGuide
+                    target={target}
+                    color={trajectoryColor}
+                  />
+                )}
+
+                {/* Striker */}
+
+                <Piece
                   point={striker}
-                  color="white"
-                  onPointerDown={() => setDragging("striker")}
+                  label="STRIKER"
+                  type="striker"
+                  onStart={() =>
+                    setDragging("striker")
+                  }
                 />
 
-                <DraggablePiece
-                  label="TARGET"
+                {/* Target */}
+
+                <Piece
                   point={target}
-                  color="#111827"
-                  onPointerDown={() => setDragging("target")}
+                  label="TARGET"
+                  type="target"
+                  onStart={() =>
+                    setDragging("target")
+                  }
                 />
 
               </div>
+
             </div>
+
           </div>
+
+          {/* CONTROLS */}
 
           <aside className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-5">
 
@@ -181,43 +243,51 @@ export default function AnalysisPage() {
               Shot Configuration
             </h2>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-3">
 
-              <PositionCard
+              <InfoCard
                 title="Striker"
-                point={striker}
+                x={striker.x}
+                y={striker.y}
               />
 
-              <PositionCard
+              <InfoCard
                 title="Target"
-                point={target}
+                x={target.x}
+                y={target.y}
               />
 
             </div>
 
             <div className="mt-5 rounded-2xl border border-cyan-400/10 bg-cyan-400/5 p-4">
 
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between">
+
                 <span className="text-xs text-slate-400">
                   Calculated Angle
                 </span>
 
-                <span className="text-sm font-bold text-cyan-300">
+                <span className="font-bold text-cyan-300">
                   {angle}°
                 </span>
+
               </div>
 
-              <div className="mt-3 flex items-center justify-between">
+              <div className="mt-3 flex justify-between">
+
                 <span className="text-xs text-slate-400">
                   Shot Distance
                 </span>
 
-                <span className="text-sm font-bold text-cyan-300">
+                <span className="font-bold text-cyan-300">
                   {distance.toFixed(1)}%
                 </span>
+
               </div>
 
             </div>
+
+            {/* COLORS */}
 
             <div className="mt-6">
 
@@ -225,7 +295,8 @@ export default function AnalysisPage() {
                 Trajectory Color
               </p>
 
-              <div className="grid grid-cols-5 gap-2">
+              <div className="flex gap-2">
+
                 {[
                   "#22d3ee",
                   "#3b82f6",
@@ -233,42 +304,54 @@ export default function AnalysisPage() {
                   "#facc15",
                   "#ec4899",
                 ].map((color) => (
+
                   <button
                     key={color}
-                    onClick={() => setLineColor(color)}
-                    className="h-9 rounded-xl border border-white/10 transition hover:scale-105"
+                    onClick={() =>
+                      setTrajectoryColor(color)
+                    }
+                    className="h-9 w-9 rounded-full border-2 border-white/20 transition hover:scale-110"
                     style={{
                       backgroundColor: color,
                       boxShadow:
-                        lineColor === color
+                        trajectoryColor === color
                           ? `0 0 15px ${color}`
                           : "none",
                     }}
+                    aria-label="Trajectory color"
                   />
+
                 ))}
+
               </div>
 
             </div>
+
+            {/* TOGGLES */}
 
             <div className="mt-6 space-y-3">
 
               <Toggle
                 label="Bounce Path"
                 enabled={showBounce}
-                onClick={() => setShowBounce(!showBounce)}
+                onClick={() =>
+                  setShowBounce(!showBounce)
+                }
               />
 
               <Toggle
                 label="Target Highlight"
                 enabled={showTarget}
-                onClick={() => setShowTarget(!showTarget)}
+                onClick={() =>
+                  setShowTarget(!showTarget)
+                }
               />
 
             </div>
 
             <button
               onClick={resetBoard}
-              className="mt-6 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold hover:bg-white/10"
+              className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 text-sm font-bold shadow-lg shadow-cyan-500/10 hover:scale-[1.01]"
             >
               Reset Board
             </button>
@@ -280,57 +363,76 @@ export default function AnalysisPage() {
               </p>
 
               <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                Drag the white striker or dark target directly on the board
-                to update the trajectory.
+                Touch and drag the white STRIKER or
+                dark TARGET directly on the board.
               </p>
 
             </div>
 
           </aside>
+
         </section>
+
       </div>
+
     </main>
   );
 }
 
-function DraggablePiece({
-  label,
+/* ---------------- PIECE ---------------- */
+
+function Piece({
   point,
-  color,
-  onPointerDown,
+  label,
+  type,
+  onStart,
 }: {
-  label: string;
   point: Point;
-  color: string;
-  onPointerDown: () => void;
+  label: string;
+  type: "striker" | "target";
+  onStart: () => void;
 }) {
   return (
-    <>
-      <div
-        onPointerDown={(event) => {
-          event.preventDefault();
-          onPointerDown();
-        }}
-        className="absolute z-20 h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-white shadow-xl active:cursor-grabbing"
-        style={{
-          left: `${point.x}%`,
-          top: `${point.y}%`,
-          backgroundColor: color,
-        }}
-      />
+    <div
+      onPointerDown={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onStart();
+      }}
+      className="absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center active:cursor-grabbing"
+      style={{
+        left: `${point.x}%`,
+        top: `${point.y}%`,
+      }}
+    >
 
       <div
-        className="pointer-events-none absolute z-10 -translate-x-1/2 rounded-full border border-white/20 bg-black/60 px-2 py-1 text-[8px] text-white backdrop-blur"
-        style={{
-          left: `${point.x}%`,
-          top: `${Math.min(point.y + 7, 92)}%`,
-        }}
+        className={`relative h-12 w-12 rounded-full border-4 shadow-2xl ${
+          type === "striker"
+            ? "border-white bg-white"
+            : "border-slate-800 bg-[#111827]"
+        }`}
       >
-        {label}
+
+        <div
+          className={`absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full ${
+            type === "striker"
+              ? "bg-cyan-400"
+              : "bg-cyan-300"
+          }`}
+        />
+
       </div>
-    </>
+
+      <span className="mt-2 rounded-full bg-black/70 px-2 py-1 text-[8px] font-bold tracking-wider text-white backdrop-blur">
+        {label}
+      </span>
+
+    </div>
   );
 }
+
+/* ---------------- TRAJECTORY ---------------- */
 
 function Trajectory({
   striker,
@@ -344,27 +446,39 @@ function Trajectory({
   const dx = target.x - striker.x;
   const dy = target.y - striker.y;
 
-  const length = Math.sqrt(dx * dx + dy * dy);
+  const length = Math.sqrt(
+    dx * dx + dy * dy
+  );
 
-  const rotation =
-    Math.atan2(dy, dx) * (180 / Math.PI);
+  const angle =
+    Math.atan2(dy, dx) *
+    (180 / Math.PI);
 
   return (
     <div
-      className="pointer-events-none absolute z-10 h-[3px] origin-left"
+      className="pointer-events-none absolute z-20 h-[4px] origin-left rounded-full"
       style={{
         left: `${striker.x}%`,
         top: `${striker.y}%`,
         width: `${length}%`,
         backgroundColor: color,
-        boxShadow: `0 0 12px ${color}`,
-        transform: `rotate(${rotation}deg)`,
+        boxShadow: `0 0 14px ${color}`,
+        transform: `rotate(${angle}deg)`,
       }}
-    />
+    >
+      <div
+        className="absolute right-0 top-1/2 h-3 w-3 -translate-y-1/2 translate-x-1/2 rotate-45"
+        style={{
+          backgroundColor: color,
+        }}
+      />
+    </div>
   );
 }
 
-function BouncePath({
+/* ---------------- BOUNCE ---------------- */
+
+function BounceGuide({
   target,
   color,
 }: {
@@ -373,45 +487,59 @@ function BouncePath({
 }) {
   return (
     <div
-      className="pointer-events-none absolute z-10 h-[2px] origin-left"
+      className="pointer-events-none absolute z-10 h-[3px] origin-left border-t-2 border-dashed"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
         width: "25%",
-        backgroundColor: color,
-        boxShadow: `0 0 10px ${color}`,
-        transform: "rotate(-42deg)",
+        borderColor: color,
+        transform:
+          "rotate(-42deg)",
+        filter:
+          `drop-shadow(0 0 5px ${color})`,
       }}
     />
   );
 }
 
-function Pocket({ className }: { className: string }) {
+/* ---------------- POCKET ---------------- */
+
+function Pocket({
+  className,
+}: {
+  className: string;
+}) {
   return (
     <div
-      className={`absolute h-12 w-12 rounded-full bg-[#17110d] shadow-[inset_0_0_14px_rgba(0,0,0,0.9)] ${className}`}
+      className={`pointer-events-none absolute z-5 h-14 w-14 rounded-full bg-[#0b0806] shadow-[inset_0_0_18px_rgba(0,0,0,0.95)] ${className}`}
     />
   );
 }
 
-function PositionCard({
+/* ---------------- INFO CARD ---------------- */
+
+function InfoCard({
   title,
-  point,
+  x,
+  y,
 }: {
   title: string;
-  point: Point;
+  x: number;
+  y: number;
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
 
       <div className="flex items-center justify-between">
+
         <span className="text-sm font-semibold">
           {title}
         </span>
 
-        <span className="text-xs text-cyan-300">
-          {point.x.toFixed(0)}%, {point.y.toFixed(0)}%
+        <span className="text-xs font-bold text-cyan-300">
+          {x.toFixed(0)}%, {y.toFixed(0)}%
         </span>
+
       </div>
 
       <p className="mt-2 text-[11px] text-slate-500">
@@ -421,6 +549,8 @@ function PositionCard({
     </div>
   );
 }
+
+/* ---------------- TOGGLE ---------------- */
 
 function Toggle({
   label,
@@ -434,19 +564,21 @@ function Toggle({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm hover:bg-white/10"
+      className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm transition hover:bg-white/10"
     >
+
       <span>{label}</span>
 
       <span
         className={
           enabled
-            ? "text-cyan-300"
-            : "text-slate-600"
+            ? "font-bold text-cyan-300"
+            : "font-bold text-slate-600"
         }
       >
         {enabled ? "ON" : "OFF"}
       </span>
+
     </button>
   );
           }
