@@ -7,20 +7,22 @@ type Point = {
   y: number;
 };
 
+const BOARD_SIZE = 700;
+
 export default function AnalysisPage() {
   const [striker, setStriker] = useState<Point>({
-    x: 25,
-    y: 70,
+    x: 175,
+    y: 490,
   });
 
   const [target, setTarget] = useState<Point>({
-    x: 62,
-    y: 35,
+    x: 434,
+    y: 245,
   });
 
-  const [dragging, setDragging] = useState<
-    "striker" | "target" | null
-  >(null);
+  const [dragging, setDragging] = useState<"striker" | "target" | null>(
+    null
+  );
 
   const [bouncePath, setBouncePath] = useState(true);
   const [targetHighlight, setTargetHighlight] = useState(true);
@@ -28,49 +30,64 @@ export default function AnalysisPage() {
   const dx = target.x - striker.x;
   const dy = target.y - striker.y;
 
-  const angle = Math.round(
-    Math.atan2(dy, dx) * (180 / Math.PI)
-  );
-
+  const angle = Math.round((Math.atan2(dy, dx) * 180) / Math.PI);
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  function movePiece(
-    event: React.PointerEvent<HTMLDivElement>
+  const strikerX = Math.round((striker.x / BOARD_SIZE) * 100);
+  const strikerY = Math.round((striker.y / BOARD_SIZE) * 100);
+
+  const targetX = Math.round((target.x / BOARD_SIZE) * 100);
+  const targetY = Math.round((target.y / BOARD_SIZE) * 100);
+
+  function getBoardPoint(
+    event: React.PointerEvent<SVGSVGElement>
+  ): Point {
+    const svg = event.currentTarget;
+    const rect = svg.getBoundingClientRect();
+
+    const scaleX = BOARD_SIZE / rect.width;
+    const scaleY = BOARD_SIZE / rect.height;
+
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
+    return {
+      x: Math.max(45, Math.min(655, x)),
+      y: Math.max(45, Math.min(655, y)),
+    };
+  }
+
+  function handlePointerMove(
+    event: React.PointerEvent<SVGSVGElement>
   ) {
     if (!dragging) return;
 
-    const board = event.currentTarget.getBoundingClientRect();
-
-    let x =
-      ((event.clientX - board.left) / board.width) * 100;
-
-    let y =
-      ((event.clientY - board.top) / board.height) * 100;
-
-    x = Math.max(8, Math.min(92, x));
-    y = Math.max(8, Math.min(92, y));
+    const point = getBoardPoint(event);
 
     if (dragging === "striker") {
-      setStriker({ x, y });
-    }
-
-    if (dragging === "target") {
-      setTarget({ x, y });
+      setStriker(point);
+    } else {
+      setTarget(point);
     }
   }
 
   function resetBoard() {
-    setStriker({ x: 25, y: 70 });
-    setTarget({ x: 62, y: 35 });
+    setStriker({
+      x: 175,
+      y: 490,
+    });
+
+    setTarget({
+      x: 434,
+      y: 245,
+    });
   }
 
   return (
     <main className="min-h-screen bg-[#050812] px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
 
-        {/* HEADER */}
-
-        <header className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-cyan-400">
               Carrom Master AI
@@ -80,7 +97,7 @@ export default function AnalysisPage() {
               Shot Analysis
             </h1>
 
-            <p className="text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500">
               Interactive trajectory workspace
             </p>
           </div>
@@ -99,83 +116,163 @@ export default function AnalysisPage() {
 
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.035] p-4 md:p-6">
 
-            <div className="mb-5 flex items-center justify-between">
+            <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold">
                   Interactive Analysis Board
                 </h2>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Drag STRIKER or TARGET anywhere on the board.
+                  Drag the white striker or black target.
                 </p>
               </div>
 
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-400">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-400">
                 ENGINE READY
               </span>
             </div>
 
-            {/* REAL BOARD */}
+            {/* SVG CARROM BOARD */}
 
-            <div
-              onPointerMove={movePiece}
-              onPointerUp={() => setDragging(null)}
-              onPointerLeave={() => setDragging(null)}
-              className="relative mx-auto aspect-square w-full max-w-[680px] touch-none rounded-[32px] border-[16px] border-[#6b3f20] bg-[#d39a55] p-6 shadow-2xl"
-            >
+            <div className="mx-auto w-full max-w-[720px] overflow-hidden rounded-[32px] border-[12px] border-[#5b3218] bg-[#8b5428] p-2 shadow-2xl">
 
-              {/* INNER BOARD */}
+              <svg
+                viewBox={`0 0 ${BOARD_SIZE} ${BOARD_SIZE}`}
+                className="block h-auto w-full touch-none select-none rounded-[18px]"
+                onPointerMove={handlePointerMove}
+                onPointerUp={() => setDragging(null)}
+                onPointerCancel={() => setDragging(null)}
+              >
 
-              <div className="relative h-full w-full overflow-hidden rounded-[24px] border-4 border-[#8b5a2b] bg-[#c98d48]">
+                {/* WOOD BOARD */}
 
-                {/* CENTER CIRCLE */}
+                <rect
+                  x="0"
+                  y="0"
+                  width="700"
+                  height="700"
+                  rx="25"
+                  fill="#d29a58"
+                />
 
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#70451f]/50" />
+                {/* INNER PLAYING AREA */}
 
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#70451f]/60" />
+                <rect
+                  x="35"
+                  y="35"
+                  width="630"
+                  height="630"
+                  rx="14"
+                  fill="#c88c49"
+                  stroke="#75431f"
+                  strokeWidth="6"
+                />
 
-                {/* CENTER LINES */}
+                {/* BASE MARKINGS */}
 
-                <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#70451f]/20" />
+                <circle
+                  cx="350"
+                  cy="350"
+                  r="72"
+                  fill="none"
+                  stroke="#75431f"
+                  strokeWidth="3"
+                  opacity="0.65"
+                />
 
-                <div className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 bg-[#70451f]/20" />
+                <circle
+                  cx="350"
+                  cy="350"
+                  r="9"
+                  fill="#75431f"
+                  opacity="0.8"
+                />
+
+                <line
+                  x1="350"
+                  y1="60"
+                  x2="350"
+                  y2="640"
+                  stroke="#75431f"
+                  strokeWidth="2"
+                  opacity="0.18"
+                />
+
+                <line
+                  x1="60"
+                  y1="350"
+                  x2="640"
+                  y2="350"
+                  stroke="#75431f"
+                  strokeWidth="2"
+                  opacity="0.18"
+                />
 
                 {/* POCKETS */}
 
-                <Pocket left="2%" top="2%" />
-                <Pocket left="98%" top="2%" />
-                <Pocket left="2%" top="98%" />
-                <Pocket left="98%" top="98%" />
+                <Pocket x={45} y={45} />
+                <Pocket x={655} y={45} />
+                <Pocket x={45} y={655} />
+                <Pocket x={655} y={655} />
 
-                {/* STRAIGHT TRAJECTORY */}
+                {/* TRAJECTORY */}
 
-                <div
-                  className="pointer-events-none absolute z-10 h-[5px] origin-left rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.9)]"
-                  style={{
-                    left: `${striker.x}%`,
-                    top: `${striker.y}%`,
-                    width: `${distance}%`,
-                    transform: `rotate(${angle}deg)`,
-                  }}
+                <line
+                  x1={striker.x}
+                  y1={striker.y}
+                  x2={target.x}
+                  y2={target.y}
+                  stroke="#22d3ee"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  opacity="0.95"
                 />
+
+                {/* TRAJECTORY GLOW */}
+
+                <line
+                  x1={striker.x}
+                  y1={striker.y}
+                  x2={target.x}
+                  y2={target.y}
+                  stroke="#22d3ee"
+                  strokeWidth="18"
+                  strokeLinecap="round"
+                  opacity="0.12"
+                />
+
+                {/* OPTIONAL BOUNCE PATH */}
+
+                {bouncePath && (
+                  <line
+                    x1={target.x}
+                    y1={target.y}
+                    x2={target.x + 150}
+                    y2={Math.max(70, target.y - 110)}
+                    stroke="#67e8f9"
+                    strokeWidth="4"
+                    strokeDasharray="12 10"
+                    opacity="0.8"
+                  />
+                )}
 
                 {/* TARGET HIGHLIGHT */}
 
                 {targetHighlight && (
-                  <div
-                    className="pointer-events-none absolute z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-cyan-300"
-                    style={{
-                      left: `${target.x}%`,
-                      top: `${target.y}%`,
-                      boxShadow:
-                        "0 0 20px rgba(34,211,238,0.8)",
-                    }}
+                  <circle
+                    cx={target.x}
+                    cy={target.y}
+                    r="42"
+                    fill="none"
+                    stroke="#22d3ee"
+                    strokeWidth="3"
+                    strokeDasharray="8 7"
                   />
                 )}
 
                 {/* STRIKER */}
 
-                <div
+                <g
                   onPointerDown={(event) => {
                     event.stopPropagation();
                     event.currentTarget.setPointerCapture(
@@ -183,24 +280,40 @@ export default function AnalysisPage() {
                     );
                     setDragging("striker");
                   }}
-                  className="absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none flex-col items-center active:cursor-grabbing"
-                  style={{
-                    left: `${striker.x}%`,
-                    top: `${striker.y}%`,
-                  }}
+                  className="cursor-grab"
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_0_25px_rgba(255,255,255,0.8)]">
-                    <div className="h-5 w-5 rounded-full bg-cyan-400" />
-                  </div>
 
-                  <span className="mt-2 rounded-full bg-black/80 px-2 py-1 text-[9px] font-bold">
+                  <circle
+                    cx={striker.x}
+                    cy={striker.y}
+                    r="31"
+                    fill="#ffffff"
+                    stroke="#dbeafe"
+                    strokeWidth="5"
+                  />
+
+                  <circle
+                    cx={striker.x}
+                    cy={striker.y}
+                    r="10"
+                    fill="#22d3ee"
+                  />
+
+                  <text
+                    x={striker.x}
+                    y={striker.y + 55}
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="15"
+                    fontWeight="700"
+                  >
                     STRIKER
-                  </span>
-                </div>
+                  </text>
+                </g>
 
                 {/* TARGET */}
 
-                <div
+                <g
                   onPointerDown={(event) => {
                     event.stopPropagation();
                     event.currentTarget.setPointerCapture(
@@ -208,22 +321,38 @@ export default function AnalysisPage() {
                     );
                     setDragging("target");
                   }}
-                  className="absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none flex-col items-center active:cursor-grabbing"
-                  style={{
-                    left: `${target.x}%`,
-                    top: `${target.y}%`,
-                  }}
+                  className="cursor-grab"
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-slate-700 bg-[#111827] shadow-[0_0_25px_rgba(34,211,238,0.55)]">
-                    <div className="h-5 w-5 rounded-full bg-cyan-300" />
-                  </div>
 
-                  <span className="mt-2 rounded-full bg-black/80 px-2 py-1 text-[9px] font-bold">
+                  <circle
+                    cx={target.x}
+                    cy={target.y}
+                    r="31"
+                    fill="#111827"
+                    stroke="#374151"
+                    strokeWidth="5"
+                  />
+
+                  <circle
+                    cx={target.x}
+                    cy={target.y}
+                    r="10"
+                    fill="#67e8f9"
+                  />
+
+                  <text
+                    x={target.x}
+                    y={target.y + 55}
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="15"
+                    fontWeight="700"
+                  >
                     TARGET
-                  </span>
-                </div>
+                  </text>
+                </g>
 
-              </div>
+              </svg>
             </div>
           </div>
 
@@ -239,8 +368,6 @@ export default function AnalysisPage() {
               Shot Configuration
             </h2>
 
-            {/* STRIKER */}
-
             <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex justify-between">
                 <span className="text-sm font-semibold">
@@ -248,16 +375,14 @@ export default function AnalysisPage() {
                 </span>
 
                 <span className="text-xs font-bold text-cyan-300">
-                  {striker.x.toFixed(0)}%, {striker.y.toFixed(0)}%
+                  {strikerX}%, {strikerY}%
                 </span>
               </div>
 
               <p className="mt-2 text-[11px] text-slate-500">
-                Drag the striker on the board.
+                Drag the white striker on the board.
               </p>
             </div>
-
-            {/* TARGET */}
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex justify-between">
@@ -266,16 +391,16 @@ export default function AnalysisPage() {
                 </span>
 
                 <span className="text-xs font-bold text-cyan-300">
-                  {target.x.toFixed(0)}%, {target.y.toFixed(0)}%
+                  {targetX}%, {targetY}%
                 </span>
               </div>
 
               <p className="mt-2 text-[11px] text-slate-500">
-                Drag the target on the board.
+                Drag the dark target on the board.
               </p>
             </div>
 
-            {/* CALCULATIONS */}
+            {/* ANALYSIS */}
 
             <div className="mt-4 rounded-2xl border border-cyan-400/10 bg-cyan-400/5 p-4">
 
@@ -295,20 +420,9 @@ export default function AnalysisPage() {
                 </span>
 
                 <span className="font-bold text-cyan-300">
-                  {distance.toFixed(1)}%
+                  {distance.toFixed(1)}
                 </span>
               </div>
-
-            </div>
-
-            {/* TRAJECTORY COLOR */}
-
-            <div className="mt-6">
-              <p className="mb-3 text-xs text-slate-400">
-                Trajectory Color
-              </p>
-
-              <div className="h-2 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500" />
             </div>
 
             {/* BOUNCE */}
@@ -355,32 +469,32 @@ export default function AnalysisPage() {
 
               <p className="mt-2 text-[11px] leading-5 text-slate-500">
                 Touch and drag the white STRIKER or dark TARGET
-                directly on the board.
+                directly on the Carrom board.
               </p>
             </div>
 
           </aside>
         </section>
-
       </div>
     </main>
   );
 }
 
 function Pocket({
-  left,
-  top,
+  x,
+  y,
 }: {
-  left: string;
-  top: string;
+  x: number;
+  y: number;
 }) {
   return (
-    <div
-      className="pointer-events-none absolute z-20 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#090604] shadow-[inset_0_0_15px_rgba(0,0,0,1)]"
-      style={{
-        left,
-        top,
-      }}
+    <circle
+      cx={x}
+      cy={y}
+      r="27"
+      fill="#080604"
+      stroke="#3a2111"
+      strokeWidth="6"
     />
   );
-                  }
+                      }
