@@ -1,6 +1,6 @@
 "use client";
 
-import { PointerEvent, useRef, useState } from "react";
+import { useState } from "react";
 
 type Point = {
   x: number;
@@ -8,8 +8,6 @@ type Point = {
 };
 
 export default function AnalysisPage() {
-  const boardRef = useRef<HTMLDivElement>(null);
-
   const [striker, setStriker] = useState<Point>({
     x: 25,
     y: 70,
@@ -24,32 +22,8 @@ export default function AnalysisPage() {
     "striker" | "target" | null
   >(null);
 
-  const [bounce, setBounce] = useState(true);
-  const [highlight, setHighlight] = useState(true);
-  const [color, setColor] = useState("#22d3ee");
-
-  function updatePosition(
-    event: PointerEvent<HTMLDivElement>
-  ) {
-    if (!dragging || !boardRef.current) return;
-
-    const rect = boardRef.current.getBoundingClientRect();
-
-    let x =
-      ((event.clientX - rect.left) / rect.width) * 100;
-
-    let y =
-      ((event.clientY - rect.top) / rect.height) * 100;
-
-    x = Math.max(5, Math.min(95, x));
-    y = Math.max(5, Math.min(95, y));
-
-    if (dragging === "striker") {
-      setStriker({ x, y });
-    } else {
-      setTarget({ x, y });
-    }
-  }
+  const [bouncePath, setBouncePath] = useState(true);
+  const [targetHighlight, setTargetHighlight] = useState(true);
 
   const dx = target.x - striker.x;
   const dy = target.y - striker.y;
@@ -60,6 +34,31 @@ export default function AnalysisPage() {
 
   const distance = Math.sqrt(dx * dx + dy * dy);
 
+  function movePiece(
+    event: React.PointerEvent<HTMLDivElement>
+  ) {
+    if (!dragging) return;
+
+    const board = event.currentTarget.getBoundingClientRect();
+
+    let x =
+      ((event.clientX - board.left) / board.width) * 100;
+
+    let y =
+      ((event.clientY - board.top) / board.height) * 100;
+
+    x = Math.max(8, Math.min(92, x));
+    y = Math.max(8, Math.min(92, y));
+
+    if (dragging === "striker") {
+      setStriker({ x, y });
+    }
+
+    if (dragging === "target") {
+      setTarget({ x, y });
+    }
+  }
+
   function resetBoard() {
     setStriker({ x: 25, y: 70 });
     setTarget({ x: 62, y: 35 });
@@ -69,7 +68,9 @@ export default function AnalysisPage() {
     <main className="min-h-screen bg-[#050812] px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
 
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+        {/* HEADER */}
+
+        <header className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-cyan-400">
               Carrom Master AI
@@ -79,7 +80,7 @@ export default function AnalysisPage() {
               Shot Analysis
             </h1>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="text-xs text-slate-500">
               Interactive trajectory workspace
             </p>
           </div>
@@ -105,7 +106,7 @@ export default function AnalysisPage() {
                 </h2>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Drag the striker and target directly on the board.
+                  Drag STRIKER or TARGET anywhere on the board.
                 </p>
               </div>
 
@@ -114,85 +115,113 @@ export default function AnalysisPage() {
               </span>
             </div>
 
+            {/* REAL BOARD */}
+
             <div
-              ref={boardRef}
-              onPointerMove={updatePosition}
+              onPointerMove={movePiece}
               onPointerUp={() => setDragging(null)}
-              onPointerCancel={() => setDragging(null)}
-              className="relative mx-auto aspect-square w-full max-w-[700px] touch-none rounded-[28px] border-[14px] border-[#633918] bg-[#d6a05c] p-[6%] shadow-2xl"
+              onPointerLeave={() => setDragging(null)}
+              className="relative mx-auto aspect-square w-full max-w-[680px] touch-none rounded-[32px] border-[16px] border-[#6b3f20] bg-[#d39a55] p-6 shadow-2xl"
             >
 
-              <div className="relative h-full w-full overflow-hidden rounded-2xl border-4 border-[#4a2917] bg-[#c88f4e]">
+              {/* INNER BOARD */}
 
-                {/* Board lines */}
+              <div className="relative h-full w-full overflow-hidden rounded-[24px] border-4 border-[#8b5a2b] bg-[#c98d48]">
 
-                <div className="pointer-events-none absolute inset-[9%] rounded-full border-2 border-[#70451f]/30" />
+                {/* CENTER CIRCLE */}
 
-                <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#70451f]/15" />
+                <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#70451f]/50" />
 
-                <div className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 bg-[#70451f]/15" />
+                <div className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#70451f]/60" />
 
-                {/* Pockets */}
+                {/* CENTER LINES */}
 
-                <Pocket className="-left-7 -top-7" />
-                <Pocket className="-right-7 -top-7" />
-                <Pocket className="-bottom-7 -left-7" />
-                <Pocket className="-bottom-7 -right-7" />
+                <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#70451f]/20" />
 
-                {/* Trajectory */}
+                <div className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2 bg-[#70451f]/20" />
 
-                <Trajectory
-                  striker={striker}
-                  target={target}
-                  color={color}
+                {/* POCKETS */}
+
+                <Pocket left="2%" top="2%" />
+                <Pocket left="98%" top="2%" />
+                <Pocket left="2%" top="98%" />
+                <Pocket left="98%" top="98%" />
+
+                {/* STRAIGHT TRAJECTORY */}
+
+                <div
+                  className="pointer-events-none absolute z-10 h-[5px] origin-left rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.9)]"
+                  style={{
+                    left: `${striker.x}%`,
+                    top: `${striker.y}%`,
+                    width: `${distance}%`,
+                    transform: `rotate(${angle}deg)`,
+                  }}
                 />
 
-                {/* Target highlight */}
+                {/* TARGET HIGHLIGHT */}
 
-                {highlight && (
+                {targetHighlight && (
                   <div
-                    className="pointer-events-none absolute z-10 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed"
+                    className="pointer-events-none absolute z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-cyan-300"
                     style={{
                       left: `${target.x}%`,
                       top: `${target.y}%`,
-                      borderColor: color,
-                      boxShadow: `0 0 20px ${color}`,
-                    }}
-                  />
-                )}
-
-                {/* Bounce */}
-
-                {bounce && (
-                  <div
-                    className="pointer-events-none absolute z-10 h-[3px] origin-left border-t-2 border-dashed"
-                    style={{
-                      left: `${target.x}%`,
-                      top: `${target.y}%`,
-                      width: "25%",
-                      borderColor: color,
-                      transform: "rotate(-40deg)",
+                      boxShadow:
+                        "0 0 20px rgba(34,211,238,0.8)",
                     }}
                   />
                 )}
 
                 {/* STRIKER */}
 
-                <Piece
-                  point={striker}
-                  label="STRIKER"
-                  dark={false}
-                  onStart={() => setDragging("striker")}
-                />
+                <div
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                    event.currentTarget.setPointerCapture(
+                      event.pointerId
+                    );
+                    setDragging("striker");
+                  }}
+                  className="absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none flex-col items-center active:cursor-grabbing"
+                  style={{
+                    left: `${striker.x}%`,
+                    top: `${striker.y}%`,
+                  }}
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_0_25px_rgba(255,255,255,0.8)]">
+                    <div className="h-5 w-5 rounded-full bg-cyan-400" />
+                  </div>
+
+                  <span className="mt-2 rounded-full bg-black/80 px-2 py-1 text-[9px] font-bold">
+                    STRIKER
+                  </span>
+                </div>
 
                 {/* TARGET */}
 
-                <Piece
-                  point={target}
-                  label="TARGET"
-                  dark={true}
-                  onStart={() => setDragging("target")}
-                />
+                <div
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                    event.currentTarget.setPointerCapture(
+                      event.pointerId
+                    );
+                    setDragging("target");
+                  }}
+                  className="absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none flex-col items-center active:cursor-grabbing"
+                  style={{
+                    left: `${target.x}%`,
+                    top: `${target.y}%`,
+                  }}
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-slate-700 bg-[#111827] shadow-[0_0_25px_rgba(34,211,238,0.55)]">
+                    <div className="h-5 w-5 rounded-full bg-cyan-300" />
+                  </div>
+
+                  <span className="mt-2 rounded-full bg-black/80 px-2 py-1 text-[9px] font-bold">
+                    TARGET
+                  </span>
+                </div>
 
               </div>
             </div>
@@ -210,21 +239,45 @@ export default function AnalysisPage() {
               Shot Configuration
             </h2>
 
-            <div className="mt-6 space-y-3">
+            {/* STRIKER */}
 
-              <Info
-                title="Striker"
-                point={striker}
-              />
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-semibold">
+                  Striker
+                </span>
 
-              <Info
-                title="Target"
-                point={target}
-              />
+                <span className="text-xs font-bold text-cyan-300">
+                  {striker.x.toFixed(0)}%, {striker.y.toFixed(0)}%
+                </span>
+              </div>
 
+              <p className="mt-2 text-[11px] text-slate-500">
+                Drag the striker on the board.
+              </p>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-cyan-400/10 bg-cyan-400/5 p-4">
+            {/* TARGET */}
+
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex justify-between">
+                <span className="text-sm font-semibold">
+                  Target
+                </span>
+
+                <span className="text-xs font-bold text-cyan-300">
+                  {target.x.toFixed(0)}%, {target.y.toFixed(0)}%
+                </span>
+              </div>
+
+              <p className="mt-2 text-[11px] text-slate-500">
+                Drag the target on the board.
+              </p>
+            </div>
+
+            {/* CALCULATIONS */}
+
+            <div className="mt-4 rounded-2xl border border-cyan-400/10 bg-cyan-400/5 p-4">
 
               <div className="flex justify-between">
                 <span className="text-xs text-slate-400">
@@ -248,58 +301,49 @@ export default function AnalysisPage() {
 
             </div>
 
-            {/* COLOR */}
+            {/* TRAJECTORY COLOR */}
 
             <div className="mt-6">
               <p className="mb-3 text-xs text-slate-400">
                 Trajectory Color
               </p>
 
-              <div className="flex gap-2">
-                {[
-                  "#22d3ee",
-                  "#3b82f6",
-                  "#22c55e",
-                  "#facc15",
-                  "#ec4899",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setColor(item)}
-                    className="h-9 w-9 rounded-full border-2 border-white/20"
-                    style={{
-                      backgroundColor: item,
-                      boxShadow:
-                        color === item
-                          ? `0 0 15px ${item}`
-                          : "none",
-                    }}
-                  />
-                ))}
-              </div>
+              <div className="h-2 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500" />
             </div>
 
-            {/* TOGGLES */}
+            {/* BOUNCE */}
 
-            <div className="mt-6 space-y-3">
+            <button
+              onClick={() => setBouncePath(!bouncePath)}
+              className="mt-6 flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm"
+            >
+              <span>Bounce Path</span>
 
-              <Toggle
-                name="Bounce Path"
-                value={bounce}
-                onClick={() => setBounce(!bounce)}
-              />
+              <span className="font-bold text-cyan-300">
+                {bouncePath ? "ON" : "OFF"}
+              </span>
+            </button>
 
-              <Toggle
-                name="Target Highlight"
-                value={highlight}
-                onClick={() => setHighlight(!highlight)}
-              />
+            {/* HIGHLIGHT */}
 
-            </div>
+            <button
+              onClick={() =>
+                setTargetHighlight(!targetHighlight)
+              }
+              className="mt-3 flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm"
+            >
+              <span>Target Highlight</span>
+
+              <span className="font-bold text-cyan-300">
+                {targetHighlight ? "ON" : "OFF"}
+              </span>
+            </button>
+
+            {/* RESET */}
 
             <button
               onClick={resetBoard}
-              className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 text-sm font-bold"
+              className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-3 text-sm font-bold shadow-lg shadow-cyan-500/20"
             >
               Reset Board
             </button>
@@ -311,163 +355,32 @@ export default function AnalysisPage() {
 
               <p className="mt-2 text-[11px] leading-5 text-slate-500">
                 Touch and drag the white STRIKER or dark TARGET
-                on the board.
+                directly on the board.
               </p>
             </div>
 
           </aside>
         </section>
+
       </div>
     </main>
   );
 }
 
-function Piece({
-  point,
-  label,
-  dark,
-  onStart,
-}: {
-  point: Point;
-  label: string;
-  dark: boolean;
-  onStart: () => void;
-}) {
-  return (
-    <div
-      onPointerDown={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onStart();
-      }}
-      className="absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none active:cursor-grabbing"
-      style={{
-        left: `${point.x}%`,
-        top: `${point.y}%`,
-      }}
-    >
-
-      <div
-        className={`flex h-14 w-14 items-center justify-center rounded-full border-4 shadow-2xl ${
-          dark
-            ? "border-slate-700 bg-[#111827]"
-            : "border-white bg-white"
-        }`}
-      >
-
-        <div
-          className={`h-4 w-4 rounded-full ${
-            dark
-              ? "bg-cyan-300"
-              : "bg-cyan-500"
-          }`}
-        />
-
-      </div>
-
-      <div className="mt-2 rounded-full bg-black/80 px-2 py-1 text-center text-[9px] font-bold text-white">
-        {label}
-      </div>
-
-    </div>
-  );
-}
-
-function Trajectory({
-  striker,
-  target,
-  color,
-}: {
-  striker: Point;
-  target: Point;
-  color: string;
-}) {
-  const dx = target.x - striker.x;
-  const dy = target.y - striker.y;
-
-  const length = Math.sqrt(dx * dx + dy * dy);
-
-  const angle =
-    Math.atan2(dy, dx) * (180 / Math.PI);
-
-  return (
-    <div
-      className="pointer-events-none absolute z-20 h-1 origin-left rounded-full"
-      style={{
-        left: `${striker.x}%`,
-        top: `${striker.y}%`,
-        width: `${length}%`,
-        backgroundColor: color,
-        boxShadow: `0 0 14px ${color}`,
-        transform: `rotate(${angle}deg)`,
-      }}
-    />
-  );
-}
-
 function Pocket({
-  className,
+  left,
+  top,
 }: {
-  className: string;
+  left: string;
+  top: string;
 }) {
   return (
     <div
-      className={`pointer-events-none absolute z-20 h-14 w-14 rounded-full bg-[#080604] shadow-[inset_0_0_18px_rgba(0,0,0,0.95)] ${className}`}
+      className="pointer-events-none absolute z-20 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#090604] shadow-[inset_0_0_15px_rgba(0,0,0,1)]"
+      style={{
+        left,
+        top,
+      }}
     />
   );
-}
-
-function Info({
-  title,
-  point,
-}: {
-  title: string;
-  point: Point;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">
-          {title}
-        </span>
-
-        <span className="text-xs font-bold text-cyan-300">
-          {point.x.toFixed(0)}%, {point.y.toFixed(0)}%
-        </span>
-      </div>
-
-      <p className="mt-2 text-[11px] text-slate-500">
-        Drag the {title.toLowerCase()} on the board.
-      </p>
-    </div>
-  );
-}
-
-function Toggle({
-  name,
-  value,
-  onClick,
-}: {
-  name: string;
-  value: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm"
-    >
-      <span>{name}</span>
-
-      <span
-        className={
-          value
-            ? "font-bold text-cyan-300"
-            : "font-bold text-slate-600"
-        }
-      >
-        {value ? "ON" : "OFF"}
-      </span>
-    </button>
-  );
-                }
+                  }
